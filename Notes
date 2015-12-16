@@ -1,0 +1,9 @@
+Notes
+
+Mongo
+1. To view all the processes runnong mongod 
+	ps wuax | grep mongo 
+2. Kill that process 
+	kill processid
+
+sudo mongod dbpath data/db --port 27017

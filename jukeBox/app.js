@@ -1,14 +1,23 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
+// SET UP ===================================================
+var express       = require('express');
+var app           = express();
+var path          = require('path');
+var favicon       = require('serve-favicon');
+var logger        = require('morgan');
+var bodyParser    = require('body-parser');
+var cookieParser  = require('cookie-parser');
 
-var app = express();
+var mongoose      = require('mongoose');
+var session       = require('express-session');
+var passport      = require('passport');
+var config      = require('./config/config.js');
+var flash         = require('connect-flash');
+
+// configuration ==========================================
+mongoose.connect(config.database.url); //connect to the database 
+app.use( bodyParser.urlencoded({ extended: true }) );
+require('./config/passport')(passport);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -22,8 +31,18 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+//passporst stuff =================================================
+app.use(session({secret : 'ilovekaseanherrera'}));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash()); //use connectflash for flash messages sotred in a session 
+
+//routes====================================================
+var routes = require('./routes/index');
 app.use('/', routes);
-app.use('/api/users', users);
+require('./routes/routes.js')(app, passport);
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -32,7 +51,7 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-// error handlers
+
 
 // development error handler
 // will print stacktrace
